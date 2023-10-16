@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "98365448016",
+    "project_id": "tracking-gas",
+    "storage_bucket": "tracking-gas.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:98365448016:android:dbca36c3cd0c531f545655",
+        "android_client_info": {
+          "package_name": "com.example.gas_route"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_MUjbvxH2CGg7HWSh0MHFNarZZ0ps_oI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
