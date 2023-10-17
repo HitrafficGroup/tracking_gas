@@ -40,6 +40,9 @@ dependencies:
   latlong2: ^0.9.0
   firebase_core: ^2.17.0
   cloud_firestore: ^4.9.3
+  fluent_ui: ^4.7.6
+  getwidget: ^4.0.0
+  uuid: ^3.0.7
 
 dev_dependencies:
   flutter_test:

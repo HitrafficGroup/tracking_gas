@@ -1,6 +1,8 @@
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:gas_route/components/customDrawer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
 class solicitudClient extends StatefulWidget {
 
   const solicitudClient({super.key});
@@ -10,8 +12,9 @@ class solicitudClient extends StatefulWidget {
 }
 
 class _solicitudClientState extends State<solicitudClient> {
-  TextEditingController password = TextEditingController();
   TextEditingController cantidad = TextEditingController();
+  String? dropdownValue;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,12 +28,22 @@ class _solicitudClientState extends State<solicitudClient> {
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: TextField(
-                controller: password,
-                decoration: InputDecoration(
-                    icon: Icon(Icons.propane_tank_outlined),
-                    labelText: "Tipo de Producto",
-                )
+            child: DropdownButton<String>(
+              value: dropdownValue,
+              hint: Text('Escoga el Producto'),
+              icon: const Icon(Icons.arrow_drop_down),
+              onChanged: (String? newValue) {
+                setState(() {
+                  dropdownValue = newValue!;
+                });
+              },
+              items: <String>['Oxigeno', 'Propano', 'Argon','Nitrogeno']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
             ),
           ),
           Padding(
@@ -43,24 +56,30 @@ class _solicitudClientState extends State<solicitudClient> {
                 )
             ),
           ),
+
+
+
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(onPressed: enviarDatos, child: Text("Enviar")),
-          )
+            child: ElevatedButton(onPressed: enviarDatos, child: Text("Generar Solicitud")),
+          ),
         ],
       )
-        
+
     );
   }
   Future<void> enviarDatos()async{
-    print("enviamos el dato");
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    final city = <String, String>{
-      "name": "Los Angeles",
-      "state": "CA",
-      "country": "USA"
-    };
 
-    await db.collection("users").add(city);
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    var v4 = Uuid().v4();
+    print(v4);
+    final client_data = <String, dynamic>{
+      "producto":  dropdownValue ?? "Propano",
+      "cantidad":  cantidad.text,
+      "id":v4,
+      "latitud":"-2.876509024994795",
+      "longitud":"-78.96678575021491",
+    };
+    await db.collection("pedidos").doc(v4).set(client_data);
   }
 }

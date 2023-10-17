@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:flutter/material.dart';
 import 'package:gas_route/components/customDrawer.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+
 const mapbox_token = "pk.eyJ1Ijoicm9ja2xpb24iLCJhIjoiY2xudDA2ajRjMWpwZTJvcW1jZDRhZDdneSJ9.sNux_YNVyQBXbG0SqPRhcQ";
 
 
@@ -18,12 +21,14 @@ class TrackingVehicle extends StatefulWidget {
 
 class _TrackingVehicleState extends State<TrackingVehicle> {
   var my_position = LatLng(-2.8771849258680904, -78.96579481437648);
+  String msagepos = "0 , 0";
+
   late Timer timer;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("data"),
+          title: Text(msagepos),
         ),
         drawer: customDrawer(),
         body: FlutterMap(
@@ -51,7 +56,15 @@ class _TrackingVehicleState extends State<TrackingVehicle> {
         )
     );
   }
-  Future<Position> determinePosition() async{
+
+  void _getCurrentLocation() async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    final washingtonRef = db.collection("repartidores").doc("66fbb42a-817c-4927-a699-4b630dcd0a19");
+
+    final LocationSettings locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 100,
+    );
     LocationPermission permision;
     permision = await Geolocator.checkPermission();
     if(permision == LocationPermission.denied){
@@ -61,28 +74,27 @@ class _TrackingVehicleState extends State<TrackingVehicle> {
 
       }
     }
-    return await Geolocator.getCurrentPosition();
+    StreamSubscription<Position> positionStream = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+            (Position? position) {
+
+          washingtonRef.update({
+            "latitud":position == null ? 'Unknown' :position.latitude.toString(),
+            "longitud":position == null ? 'Unknown' :position.longitude.toString(),
+          }).then(
+                  (value) => print("DocumentSnapshot successfully updated!"),
+              onError: (e) => print("Error updating document $e"));
+          setState(() {
+            msagepos =position == null ? 'Unknown' : '${position.latitude.toString()}, ${position.longitude.toString()}';
+            my_position = LatLng(position!.latitude,position.longitude);
+          });
+        });
   }
-  void getCurrentLocation()async{
-    Position pos = await determinePosition();
-    setState(() {
-      my_position = LatLng(pos.latitude,pos.longitude);
-    });
-    print(pos.latitude);
-    print(pos.longitude);
-  }
+
+
+
   @override
-  StreamSubscription<ServiceStatus> serviceStatusStream = Geolocator.getServiceStatusStream().listen(
-          (ServiceStatus status) {
-        print(status);
-      });
   void initState() {
-    // TODO: implement initState
-
-    // timer = Timer.periodic(Duration(seconds: 3), (timer) {
-    //   getCurrentLocation();
-    // });
-
     super.initState();
+    _getCurrentLocation();
   }
 }

@@ -16,7 +16,6 @@ class _clientHomeState extends State<clientHome> {
       body: Center(
         child: Text("Home Client"),
       ),
-
     );
   }
 }
